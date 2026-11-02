@@ -1,7 +1,6 @@
 # Chinook Sales Dashboard
 
-[![Dashboard](screenshot.png)](https://github.com/tmonitraj-droid/chinook-dashboard/blob/main/screenshot.png.png)
-
+![Dashboard](screenshot.png.png)
 An interactive sales dashboard built with SQL, Python and plain HTML/CSS.
 
 **Live demo:** https://tmonitraj-droid.github.io/chinook-dashboard/
