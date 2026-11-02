@@ -1,5 +1,7 @@
 # Chinook Sales Dashboard
 
+![Dashboard](screenshot.png)
+
 An interactive sales dashboard built with SQL, Python and plain HTML/CSS.
 
 **Live demo:** https://tmonitraj-droid.github.io/chinook-dashboard/
