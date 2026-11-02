@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chinook Sales Dashboard</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#38bdf8}
+*{box-sizing:border-box}
+body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--bg);color:var(--text);font-family:Segoe UI,system-ui,sans-serif}
+header,main{max-width:1100px;margin:auto;padding:0 20px}
+header{padding-top:26px}
+h1{margin:0;font-size:1.7rem}
+header p{color:var(--muted);margin:6px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:16px 0}
+.kpi{background:var(--card);border-radius:14px;padding:18px;border-left:4px solid var(--accent)}
+.kpi span{color:var(--muted);font-size:.85rem}
+.kpi b{display:block;font-size:1.8rem;margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.card{background:var(--card);border-radius:14px;padding:16px}
+.card h2{font-size:1rem;margin:0 0 12px;color:var(--muted);font-weight:600}
+.row{display:grid;grid-template-columns:110px 1fr 64px;gap:8px;align-items:center;margin:7px 0;font-size:.82rem}
+.lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{background:rgba(148,163,184,.15);border-radius:6px;height:12px}
+.track i{display:block;height:100%;border-radius:6px}
+.row b{text-align:right;font-weight:600}
+.bars{display:flex;gap:12px;height:230px}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:.8rem}
+.col i{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(#38bdf8,#a78bfa)}
+.col b{margin-bottom:4px}.col span{margin-top:6px;color:var(--muted)}
+.donut{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.ring{width:150px;height:150px;border-radius:50%;flex:none}
+.ring::after{content:"";display:block;width:84px;height:84px;border-radius:50%;background:var(--card);margin:33px}
+.leg div{font-size:.82rem;margin:4px 0}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.insights{background:var(--card);border-radius:14px;padding:6px 20px 12px;margin-top:14px}
+.insights h2{font-size:1rem;color:var(--muted)}
+.insights li{margin:7px 0}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:22px}
+</style>
+</head>
+<body>
+<header><h1>🎵 Chinook Sales Dashboard</h1><p>Digital music store analytics, built with SQL and Python</p></header>
+<main>
+<section class="kpis" id="kpis"></section>
+<section class="grid">
+<div class="card"><h2>Revenue by year</h2><div class="bars" id="c1"></div></div>
+<div class="card"><h2>Top 10 countries by revenue</h2><div id="c2"></div></div>
+<div class="card"><h2>Revenue by genre</h2><div class="donut" id="c3"></div></div>
+<div class="card"><h2>Top 10 artists</h2><div id="c4"></div></div>
+<div class="card"><h2>Top 10 customers</h2><div id="c5"></div></div>
+</section>
+<section class="insights"><h2>Key insights</h2><ul id="ins"></ul></section>
+</main>
+<footer>Data: Chinook sample database · tmonitraj-droid on GitHub</footer>
+<script>
+const DATA = {
+ "kpis": {
+  "revenue": 2328.6,
+  "orders": 412,
+  "customers": 59,
+  "avg_order": 5.65
+ },
+ "yearly": [
+  {
+   "year": "2021",
+   "revenue": 449.46
+  },
+  {
+   "year": "2022",
+   "revenue": 481.45
+  },
+  {
+   "year": "2023",
+   "revenue": 469.58
+  },
+  {
+   "year": "2024",
+   "revenue": 477.53
+  },
+  {
+   "year": "2025",
+   "revenue": 450.58
+  }
+ ],
+ "countries": [
+  {
+   "country": "USA",
+   "revenue": 523.06
+  },
+  {
+   "country": "Canada",
+   "revenue": 303.96
+  },
+  {
+   "country": "France",
+   "revenue": 195.1
+  },
+  {
+   "country": "Brazil",
+   "revenue": 190.1
+  },
+  {
+   "country": "Germany",
+   "revenue": 156.48
+  },
+  {
+   "country": "United Kingdom",
+   "revenue": 112.86
+  },
+  {
+   "country": "Czech Republic",
+   "revenue": 90.24
+  },
+  {
+   "country": "Portugal",
+   "revenue": 77.24
+  },
+  {
+   "country": "India",
+   "revenue": 75.26
+  },
+  {
+   "country": "Chile",
+   "revenue": 46.62
+  }
+ ],
+ "genres": [
+  {
+   "genre": "Rock",
+   "revenue": 826.65
+  },
+  {
+   "genre": "Latin",
+   "revenue": 382.14
+  },
+  {
+   "genre": "Metal",
+   "revenue": 261.36
+  },
+  {
+   "genre": "Alternative & Punk",
+   "revenue": 241.56
+  },
+  {
+   "genre": "TV Shows",
+   "revenue": 93.53
+  },
+  {
+   "genre": "Jazz",
+   "revenue": 79.2
+  },
+  {
+   "genre": "Blues",
+   "revenue": 60.39
+  },
+  {
+   "genre": "Drama",
+   "revenue": 57.71
+  }
+ ],
+ "artists": [
+  {
+   "artist": "Iron Maiden",
+   "revenue": 138.6
+  },
+  {
+   "artist": "U2",
+   "revenue": 105.93
+  },
+  {
+   "artist": "Metallica",
+   "revenue": 90.09
+  },
+  {
+   "artist": "Led Zeppelin",
+   "revenue": 86.13
+  },
+  {
+   "artist": "Lost",
+   "revenue": 81.59
+  },
+  {
+   "artist": "The Office",
+   "revenue": 49.75
+  },
+  {
+   "artist": "Os Paralamas Do Sucesso",
+   "revenue": 44.55
+  },
+  {
+   "artist": "Deep Purple",
+   "revenue": 43.56
+  },
+  {
+   "artist": "Faith No More",
+   "revenue": 41.58
+  },
+  {
+   "artist": "Eric Clapton",
+   "revenue": 39.6
+  }
+ ],
+ "customers": [
+  {
+   "customer": "Helena Hol\u00fd",
+   "revenue": 49.62
+  },
+  {
+   "customer": "Richard Cunningham",
+   "revenue": 47.62
+  },
+  {
+   "customer": "Luis Rojas",
+   "revenue": 46.62
+  },
+  {
+   "customer": "Ladislav Kov\u00e1cs",
+   "revenue": 45.62
+  },
+  {
+   "customer": "Hugh O'Reilly",
+   "revenue": 45.62
+  },
+  {
+   "customer": "Frank Ralston",
+   "revenue": 43.62
+  },
+  {
+   "customer": "Julia Barnett",
+   "revenue": 43.62
+  },
+  {
+   "customer": "Fynn Zimmermann",
+   "revenue": 43.62
+  },
+  {
+   "customer": "Astrid Gruber",
+   "revenue": 42.62
+  },
+  {
+   "customer": "Victor Stevens",
+   "revenue": 42.62
+  }
+ ]
+};
+const $=id=>document.getElementById(id);
+const money=n=>'$'+Number(n).toLocaleString('en-US',{maximumFractionDigits:2});
+const pal=['#38bdf8','#a78bfa','#34d399','#fbbf24','#f87171','#fb923c','#22d3ee','#e879f9'];
+const k=DATA.kpis;
+[['Total revenue',money(k.revenue)],['Orders',k.orders],['Customers',k.customers],['Avg order value',money(k.avg_order)]]
+ .forEach(([l,v])=>$('kpis').insertAdjacentHTML('beforeend','<div class="kpi"><span>'+l+'</span><b>'+v+'</b></div>'));
+function hbars(id,rows,lk,vk){
+  const max=Math.max(...rows.map(r=>r[vk]));
+  $(id).innerHTML=rows.map((r,i)=>'<div class="row"><span class="lbl" title="'+r[lk]+'">'+r[lk]+'</span><div class="track"><i style="width:'+(r[vk]/max*100)+'%;background:'+pal[i%pal.length]+'"></i></div><b>'+money(r[vk])+'</b></div>').join('');
+}
+function vbars(id,rows,lk,vk){
+  const max=Math.max(...rows.map(r=>r[vk]));
+  $(id).innerHTML=rows.map(r=>'<div class="col"><b>'+money(r[vk])+'</b><i style="height:'+(r[vk]/max*75)+'%"></i><span>'+r[lk]+'</span></div>').join('');
+}
+function donut(id,rows,lk,vk){
+  const tot=rows.reduce((s,r)=>s+r[vk],0);let acc=0;
+  const stops=rows.map((r,i)=>{const a=acc/tot*100;acc+=r[vk];return pal[i%pal.length]+' '+a+'% '+(acc/tot*100)+'%'}).join(',');
+  $(id).innerHTML='<div class="ring" style="background:conic-gradient('+stops+')"></div><div class="leg">'+
+   rows.map((r,i)=>'<div><i style="background:'+pal[i%pal.length]+'"></i>'+r[lk]+' · '+(r[vk]/tot*100).toFixed(0)+'%</div>').join('')+'</div>';
+}
+vbars('c1',DATA.yearly,'year','revenue');
+hbars('c2',DATA.countries,'country','revenue');
+donut('c3',DATA.genres,'genre','revenue');
+hbars('c4',DATA.artists,'artist','revenue');
+hbars('c5',DATA.customers,'customer','revenue');
+const pct=v=>(v/k.revenue*100).toFixed(1)+'%';
+['<b>'+DATA.countries[0].country+'</b> is the top market, with '+pct(DATA.countries[0].revenue)+' of revenue.',
+ '<b>'+DATA.genres[0].genre+'</b> is the best-selling genre ('+money(DATA.genres[0].revenue)+').',
+ '<b>'+DATA.artists[0].artist+'</b> is the top artist by revenue ('+money(DATA.artists[0].revenue)+').',
+ 'Average order value is '+money(k.avg_order)+', so growth depends on order volume rather than basket size.']
+ .forEach(t=>$('ins').insertAdjacentHTML('beforeend','<li>'+t+'</li>'));
+</script>
+</body>
+</html>
